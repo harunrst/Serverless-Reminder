@@ -3,5 +3,7 @@
         "activityBar.background": "#ff6961",
         "titleBar.activeBackground": "#ff6961",
         "titleBar.activeForeground": "#ff6961"
-    }
+    },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "vscode.typescript-language-features"
 }

@@ -27,13 +27,17 @@ interface TodosState {
   todos: Todo[]
   newTodoName: string
   loadingTodos: boolean
+  newTodoPriority: number
+  loadingCreate: boolean
 }
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
   state: TodosState = {
     todos: [],
     newTodoName: '',
-    loadingTodos: true
+    newTodoPriority: 2,
+    loadingTodos: true,
+    loadingCreate: false
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,17 +48,19 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     this.props.history.push(`/todos/${todoId}/edit`)
   }
 
-  onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
+  onTodoCreate = async () => {
     try {
+      this.setState({ ...this.state, loadingCreate: true })
       const dueDate = this.calculateDueDate()
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
         dueDate,
-        priority: 2
+        priority: this.state.newTodoPriority
       })
       this.setState({
         todos: [...this.state.todos, newTodo],
-        newTodoName: ''
+        newTodoName: '',
+        loadingCreate: false
       })
     } catch {
       alert('Todo creation failed')
@@ -102,6 +108,10 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     }
   }
 
+  handlePriority(priority: number) {
+    this.setState({ ...this.state, newTodoPriority: priority })
+  }
+
   render() {
     return (
       <div>
@@ -119,19 +129,36 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       <Grid.Row>
         <Grid.Column width={16}>
           <Input
-            action={{
-              color: 'teal',
-              labelPosition: 'left',
-              icon: 'add',
-              content: 'New task',
-              onClick: this.onTodoCreate
-            }}
             fluid
             actionPosition="left"
             placeholder="To change the world..."
             value={this.state.newTodoName}
             onChange={this.handleNameChange}
-          />
+          >
+            <Button
+              loading={this.state.loadingCreate}
+              icon
+              labelPosition='left'
+              style={{ backgroundColor: "teal", color: "white" }}
+              onClick={this.onTodoCreate}
+            >
+              <Icon name='add' style={{ color: "white" }} />New Task</Button>
+            <input style={{ borderRadius: 0 }} />
+            <Button.Group style={{ border: "solid 1px", borderColor: "#d3d3d3", borderLeft: 0 }}>
+              <Button onClick={() => this.handlePriority(1)}
+                style={{ backgroundColor: this.state.newTodoPriority !== 1 && "white" }} icon>
+                <i className="arrow up icon" style={{ color: "red" }}></i>
+              </Button>
+              <Button onClick={() => this.handlePriority(2)}
+                style={{ backgroundColor: this.state.newTodoPriority !== 2 && "white" }} icon>
+                <i className="minus icon" style={{ color: "gray" }}></i>
+              </Button>
+              <Button onClick={() => this.handlePriority(3)}
+                style={{ backgroundColor: this.state.newTodoPriority !== 3 && "white" }} icon>
+                <i className="arrow down icon" style={{ color: "green" }}></i>
+              </Button>
+            </Button.Group>
+          </Input>
         </Grid.Column>
         <Grid.Column width={16}>
           <Divider />
@@ -139,6 +166,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       </Grid.Row>
     )
   }
+
 
   renderTodos() {
     if (this.state.loadingTodos) {
@@ -163,7 +191,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       <Grid padded>
         {this.state.todos.map((todo, pos) => {
           return (
-            <Grid.Row key={todo.todoId} style={{display:"flex", alignItems:"center", paddingTop:0}}>
+            <Grid.Row key={todo.todoId} style={{ display: "flex", alignItems: "center", paddingTop: 0 }}>
               <Grid.Column width={1} >
                 <Checkbox
                   onChange={() => this.onTodoCheck(pos)}
@@ -173,7 +201,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               <Grid.Column width={7} >
                 {todo.name}
               </Grid.Column>
-              <Grid.Column width={3} floated="right" style={{color:this.isExpired(todo.dueDate) && "red"}}>
+              <Grid.Column width={3} floated="right" style={{ color: this.isExpired(todo.dueDate) && "red" }}>
                 {dateFormat(new Date(todo.dueDate), 'dd.mm.yyyy HH:mm') as string}
               </Grid.Column>
               <Grid.Column width={3} floated="right">
@@ -221,13 +249,13 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   priorityResolver(priorty: number): React.ReactElement {
     switch (priorty) {
       case 1:
-        return <i className="arrow up icon" style={{color:"red"}}></i>
-      case 2: 
-        return <i className="minus icon" style={{color:"gray"}}></i>
+        return <i className="arrow up icon" style={{ color: "red" }}></i>
+      case 2:
+        return <i className="minus icon" style={{ color: "gray" }}></i>
       case 3:
-        return <i className="arrow down icon" style={{color:"green"}}></i>
+        return <i className="arrow down icon" style={{ color: "green" }}></i>
       default:
-        return <i className="minus icon" style={{color:"gray"}}></i>
+        return <i className="minus icon" style={{ color: "gray" }}></i>
     }
   }
 }
