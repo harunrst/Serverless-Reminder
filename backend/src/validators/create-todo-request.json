@@ -8,6 +8,10 @@
     },
     "dueDate": {
       "type": "string"
+    },
+    "priority": {
+      "type": "number",
+      "default": 1
     }
   },
   "required": ["name", "dueDate"],

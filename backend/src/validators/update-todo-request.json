@@ -11,8 +11,10 @@
     },
     "done": {
       "type": "boolean"
+    },
+    "priority": {
+      "type": "number"
     }
   },
-  "required": ["name", "dueDate"],
   "additionalProperties": false
 }

@@ -23,7 +23,8 @@ export async function createTodo(
     done: false,
     name: createTodoRequest.name,
     dueDate: createTodoRequest.dueDate,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    priority: createTodoRequest.priority ?? 1
   })
 }
 
@@ -35,7 +36,8 @@ export async function updateTodo(
   return await todoAccess.updateTodo(userId, todoId, {
     name: updateTodoRequest.name,
     done: updateTodoRequest.done,
-    dueDate: updateTodoRequest.dueDate
+    dueDate: updateTodoRequest.dueDate,
+    priority: updateTodoRequest.priority
   })
 }
 

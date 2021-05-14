@@ -1,4 +1,4 @@
-service: serverless-todo-app
+service: serverless-reminder-app
 
 plugins:
   - serverless-webpack
