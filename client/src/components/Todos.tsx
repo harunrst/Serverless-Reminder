@@ -49,7 +49,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       const dueDate = this.calculateDueDate()
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
-        dueDate
+        dueDate,
+        priority: 2
       })
       this.setState({
         todos: [...this.state.todos, newTodo],
@@ -104,7 +105,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   render() {
     return (
       <div>
-        <Header as="h1">TODOs</Header>
+        <Header as="h1">Reminders</Header>
 
         {this.renderCreateTodoInput()}
 
@@ -128,6 +129,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
             fluid
             actionPosition="left"
             placeholder="To change the world..."
+            value={this.state.newTodoName}
             onChange={this.handleNameChange}
           />
         </Grid.Column>
@@ -161,20 +163,23 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       <Grid padded>
         {this.state.todos.map((todo, pos) => {
           return (
-            <Grid.Row key={todo.todoId}>
-              <Grid.Column width={1} verticalAlign="middle">
+            <Grid.Row key={todo.todoId} style={{display:"flex", alignItems:"center", paddingTop:0}}>
+              <Grid.Column width={1} >
                 <Checkbox
                   onChange={() => this.onTodoCheck(pos)}
                   checked={todo.done}
                 />
               </Grid.Column>
-              <Grid.Column width={10} verticalAlign="middle">
+              <Grid.Column width={7} >
                 {todo.name}
               </Grid.Column>
-              <Grid.Column width={3} floated="right">
-                {todo.dueDate}
+              <Grid.Column width={3} floated="right" style={{color:this.isExpired(todo.dueDate) && "red"}}>
+                {dateFormat(new Date(todo.dueDate), 'dd.mm.yyyy HH:mm') as string}
               </Grid.Column>
-              <Grid.Column width={1} floated="right">
+              <Grid.Column width={3} floated="right">
+                {this.priorityResolver(todo.priority)}
+              </Grid.Column>
+              <Grid.Column width={2} floated="right">
                 <Button
                   icon
                   color="blue"
@@ -182,8 +187,6 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                 >
                   <Icon name="pencil" />
                 </Button>
-              </Grid.Column>
-              <Grid.Column width={1} floated="right">
                 <Button
                   icon
                   color="red"
@@ -206,9 +209,25 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   }
 
   calculateDueDate(): string {
-    const date = new Date()
-    date.setDate(date.getDate() + 7)
+    return new Date().getTime() as unknown as string
+  }
 
-    return dateFormat(date, 'yyyy-mm-dd') as string
+  isExpired(dueDate: string): boolean {
+    var d1 = new Date().getTime()
+    var d2 = new Date(dueDate).getTime()
+    return d1 > d2
+  }
+
+  priorityResolver(priorty: number): React.ReactElement {
+    switch (priorty) {
+      case 1:
+        return <i className="arrow up icon" style={{color:"red"}}></i>
+      case 2: 
+        return <i className="minus icon" style={{color:"gray"}}></i>
+      case 3:
+        return <i className="arrow down icon" style={{color:"green"}}></i>
+      default:
+        return <i className="minus icon" style={{color:"gray"}}></i>
+    }
   }
 }
