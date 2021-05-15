@@ -2,5 +2,6 @@ export interface TodoUpdate {
   name: string
   dueDate: string
   done: boolean,
-  priority: number
+  priority: number,
+  lock: boolean
 }

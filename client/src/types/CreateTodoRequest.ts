@@ -1,5 +1,6 @@
 export interface CreateTodoRequest {
   name: string
   dueDate: string,
-  priority: number
+  priority: number,
+  lock: boolean
 }

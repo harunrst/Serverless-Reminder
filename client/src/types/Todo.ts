@@ -5,5 +5,6 @@ export interface Todo {
   dueDate: string
   done: boolean
   attachmentUrl?: string,
-  priority: number
+  priority: number,
+  lock: boolean
 }

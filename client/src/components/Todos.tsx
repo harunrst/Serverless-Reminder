@@ -34,6 +34,7 @@ interface TodosState {
   newTodoPriority: number
   loadingCreate: boolean
   dueDate: string
+  newTodoLock: boolean
 }
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
@@ -43,7 +44,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     newTodoPriority: 2,
     loadingTodos: true,
     loadingCreate: false,
-    dueDate: ''
+    dueDate: '',
+    newTodoLock: true
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,14 +68,16 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
         dueDate: dueDate,
-        priority: this.state.newTodoPriority
+        priority: this.state.newTodoPriority,
+        lock: !this.state.newTodoLock
       })
       this.setState({
         todos: [...this.state.todos, newTodo],
         newTodoName: '',
         loadingCreate: false,
         newTodoPriority: 2,
-        dueDate: ""
+        dueDate: "",
+        newTodoLock: true
       })
     } catch {
       alert('Todo creation failed')
@@ -156,6 +160,10 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               onClick={this.onTodoCreate}
             >
               <Icon name='add' style={{ color: "white" }} />New Task</Button>
+            <Button onClick={() => this.setState({ ...this.state, newTodoLock: !this.state.newTodoLock })}
+              style={{ backgroundColor: "white", border: "solid 1px", borderColor: "#d3d3d3", borderLeft: 0 }} icon>
+              <i className={this.state.newTodoLock ? "lock icon" : "lock open icon"} style={{ color: this.state.newTodoLock ? "red" : "green" }}></i>
+            </Button>
             <input style={{ borderRadius: 0 }} />
             <DateTimeInput
               name="dueDate"
@@ -222,8 +230,12 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                   checked={todo.done}
                 />
               </Grid.Column>
-              <Grid.Column width={7} >
+              <Grid.Column width={6} >
                 {todo.name}
+              </Grid.Column>
+              <Grid.Column width={1} >
+                {todo.lock ?
+                  <i className={"lock open icon"} style={{ color: "green" }}></i> : ""}
               </Grid.Column>
               <Grid.Column width={3} floated="right" style={{ color: this.isExpired(todo.dueDate) && "red" }}>
                 {!!todo.dueDate ? dateFormat(new Date(todo.dueDate), 'dd.mm.yyyy HH:mm') as string : ""}

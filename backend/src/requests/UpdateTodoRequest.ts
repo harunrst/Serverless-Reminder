@@ -6,4 +6,5 @@ export interface UpdateTodoRequest {
   dueDate: string
   done: boolean
   priority: number
+  lock: boolean
 }

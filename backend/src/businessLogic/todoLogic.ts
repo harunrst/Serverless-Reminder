@@ -24,7 +24,8 @@ export async function createTodo(
     name: createTodoRequest.name,
     dueDate: createTodoRequest.dueDate,
     createdAt: new Date().toISOString(),
-    priority: createTodoRequest.priority ?? 1
+    priority: createTodoRequest.priority ?? 1,
+    lock: createTodoRequest.lock ?? true
   })
 }
 
@@ -37,7 +38,8 @@ export async function updateTodo(
     name: updateTodoRequest.name,
     done: updateTodoRequest.done,
     dueDate: updateTodoRequest.dueDate,
-    priority: updateTodoRequest.priority
+    priority: updateTodoRequest.priority,
+    lock: updateTodoRequest.lock
   })
 }
 
