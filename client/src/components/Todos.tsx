@@ -72,6 +72,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         todos: [...this.state.todos, newTodo],
         newTodoName: '',
         loadingCreate: false,
+        newTodoPriority: 2,
         dueDate: ""
       })
     } catch {
@@ -203,7 +204,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading TODOs
+          Loading Reminders
         </Loader>
       </Grid.Row>
     )
