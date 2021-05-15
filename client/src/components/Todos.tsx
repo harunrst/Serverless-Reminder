@@ -56,12 +56,16 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   onTodoCreate = async () => {
     try {
-      var date = this.state.dueDate.split(" ")[0].split(".")
-      var time = this.state.dueDate.split(" ")[1].split(":")
+      var dueDate = ""
+      if (!!this.state.dueDate) {
+        var date = this.state.dueDate.split(" ")[0].split(".")
+        var time = this.state.dueDate.split(" ")[1].split(":")
+        dueDate = new Date(Number(date[2]), Number(date[1]) - 1, Number(date[0]), Number(time[0]), Number(time[1])).getTime() as unknown as string
+      }
       this.setState({ ...this.state, loadingCreate: true })
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
-        dueDate: new Date(Number(date[2]), Number(date[1]) - 1, Number(date[0]), Number(time[0]), Number(time[1])).getTime() as unknown as string,
+        dueDate: dueDate,
         priority: this.state.newTodoPriority
       })
       this.setState({
