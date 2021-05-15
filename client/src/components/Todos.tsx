@@ -18,6 +18,10 @@ import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
 import Auth from '../auth/Auth'
 import { Todo } from '../types/Todo'
 
+import {
+  DateTimeInput,
+} from 'semantic-ui-calendar-react';
+
 interface TodosProps {
   auth: Auth
   history: History
@@ -29,6 +33,7 @@ interface TodosState {
   loadingTodos: boolean
   newTodoPriority: number
   loadingCreate: boolean
+  dueDate: string
 }
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
@@ -37,7 +42,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     newTodoName: '',
     newTodoPriority: 2,
     loadingTodos: true,
-    loadingCreate: false
+    loadingCreate: false,
+    dueDate: ''
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,17 +56,19 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   onTodoCreate = async () => {
     try {
+      var date = this.state.dueDate.split(" ")[0].split(".")
+      var time = this.state.dueDate.split(" ")[1].split(":")
       this.setState({ ...this.state, loadingCreate: true })
-      const dueDate = this.calculateDueDate()
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
-        dueDate,
+        dueDate: new Date(Number(date[2]), Number(date[1]) - 1, Number(date[0]), Number(time[0]), Number(time[1])).getTime() as unknown as string,
         priority: this.state.newTodoPriority
       })
       this.setState({
         todos: [...this.state.todos, newTodo],
         newTodoName: '',
-        loadingCreate: false
+        loadingCreate: false,
+        dueDate: ""
       })
     } catch {
       alert('Todo creation failed')
@@ -144,6 +152,17 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
             >
               <Icon name='add' style={{ color: "white" }} />New Task</Button>
             <input style={{ borderRadius: 0 }} />
+            <DateTimeInput
+              name="dueDate"
+              placeholder="Due Date"
+              value={this.state.dueDate}
+              iconPosition="left"
+              dateFormat="DD.MM.yyyy"
+              closable
+              onChange={(event, { value }) => {
+                this.setState({ ...this.state, dueDate: value });
+              }}
+            />
             <Button.Group style={{ border: "solid 1px", borderColor: "#d3d3d3", borderLeft: 0 }}>
               <Button onClick={() => this.handlePriority(1)}
                 style={{ backgroundColor: this.state.newTodoPriority !== 1 && "white" }} icon>
@@ -202,7 +221,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                 {todo.name}
               </Grid.Column>
               <Grid.Column width={3} floated="right" style={{ color: this.isExpired(todo.dueDate) && "red" }}>
-                {dateFormat(new Date(todo.dueDate), 'dd.mm.yyyy HH:mm') as string}
+                {!!todo.dueDate ? dateFormat(new Date(todo.dueDate), 'dd.mm.yyyy HH:mm') as string : ""}
               </Grid.Column>
               <Grid.Column width={3} floated="right">
                 {this.priorityResolver(todo.priority)}
@@ -234,10 +253,6 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         })}
       </Grid>
     )
-  }
-
-  calculateDueDate(): string {
-    return new Date().getTime() as unknown as string
   }
 
   isExpired(dueDate: string): boolean {
