@@ -7,14 +7,14 @@ import { EditTodo } from './components/EditTodo'
 import { NotFound } from './components/NotFound'
 import { Todos } from './components/Todos'
 
-export interface AppProps {}
+export interface AppProps { }
 
 export interface AppProps {
   auth: Auth
   history: any
 }
 
-export interface AppState {}
+export interface AppState { }
 
 export default class App extends Component<AppProps, AppState> {
   constructor(props: AppProps) {
@@ -59,7 +59,7 @@ export default class App extends Component<AppProps, AppState> {
           <Link to="/">Home</Link>
         </Menu.Item>
 
-        <Menu.Menu position="right">{this.logInLogOutButton()}</Menu.Menu>
+        <Menu.Menu position="right">{this.notificationButton()}{this.logInLogOutButton()}</Menu.Menu>
       </Menu>
     )
   }
@@ -75,6 +75,15 @@ export default class App extends Component<AppProps, AppState> {
       return (
         <Menu.Item name="login" onClick={this.handleLogin}>
           Log In
+        </Menu.Item>
+      )
+    }
+  }
+  notificationButton() {
+    if (this.props.auth.isAuthenticated()) {
+      return (
+        <Menu.Item>
+          <i style={{ margin: 0 }} className="bell outline icon"></i>
         </Menu.Item>
       )
     }
