@@ -25,6 +25,7 @@ import {
 interface TodosProps {
   auth: Auth
   history: History
+  isDiscover?: boolean
 }
 
 interface TodosState {
@@ -45,7 +46,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     loadingTodos: true,
     loadingCreate: false,
     dueDate: '',
-    newTodoLock: true
+    newTodoLock: true,
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,6 +82,19 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       })
     } catch {
       alert('Todo creation failed')
+    }
+  }
+  async componentDidUpdate(prevProps: TodosProps) {
+    if (prevProps.isDiscover !== this.props.isDiscover) {
+      try {
+        const todos = await getTodos(this.props.auth.getIdToken())
+        this.setState({
+          todos,
+          loadingTodos: false
+        })
+      } catch (e) {
+        alert(`Failed to fetch todos: ${e.message}`)
+      }
     }
   }
 
@@ -133,8 +147,11 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     return (
       <div>
         <Header as="h1">Reminders</Header>
+        {!this.props.isDiscover && this.renderCreateTodoInput()}
 
-        {this.renderCreateTodoInput()}
+        <Grid.Column width={16}>
+          <Divider />
+        </Grid.Column>
 
         {this.renderTodos()}
       </div>
@@ -192,9 +209,6 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
             </Button.Group>
           </Input>
         </Grid.Column>
-        <Grid.Column width={16}>
-          <Divider />
-        </Grid.Column>
       </Grid.Row>
     )
   }
@@ -230,12 +244,12 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                   checked={todo.done}
                 />
               </Grid.Column>
-              <Grid.Column width={6} >
-                {todo.name}
-              </Grid.Column>
               <Grid.Column width={1} >
                 {todo.lock ?
                   <i className={"lock open icon"} style={{ color: "green" }}></i> : ""}
+              </Grid.Column>
+              <Grid.Column width={6} >
+                {todo.name}
               </Grid.Column>
               <Grid.Column width={3} floated="right" style={{ color: this.isExpired(todo.dueDate) && "red" }}>
                 {!!todo.dueDate ? dateFormat(new Date(todo.dueDate), 'dd.mm.yyyy HH:mm') as string : ""}

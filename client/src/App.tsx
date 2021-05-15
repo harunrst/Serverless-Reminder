@@ -55,8 +55,11 @@ export default class App extends Component<AppProps, AppState> {
   generateMenu() {
     return (
       <Menu>
-        <Menu.Item name="home">
+        <Menu.Item active={window.location.pathname === "/"} name="home">
           <Link to="/">Home</Link>
+        </Menu.Item>
+        <Menu.Item active={window.location.pathname === "/discover"} name="discover">
+          <Link to="/discover">Discover</Link>
         </Menu.Item>
 
         <Menu.Menu position="right">{this.notificationButton()}{this.logInLogOutButton()}</Menu.Menu>
@@ -101,6 +104,14 @@ export default class App extends Component<AppProps, AppState> {
           exact
           render={props => {
             return <Todos {...props} auth={this.props.auth} />
+          }}
+        />
+
+        <Route
+          path="/discover"
+          exact
+          render={props => {
+            return <Todos {...props} isDiscover auth={this.props.auth} />
           }}
         />
 
