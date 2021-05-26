@@ -2,7 +2,7 @@
     "workbench.colorCustomizations": {
         "activityBar.background": "#ff6961",
         "titleBar.activeBackground": "#ff6961",
-        "titleBar.activeForeground": "#ff6961"
+        "titleBar.activeForeground": "#F6FCFE"
     },
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "vscode.typescript-language-features"
