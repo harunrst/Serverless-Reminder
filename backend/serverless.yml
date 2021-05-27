@@ -241,9 +241,12 @@ resources:
         AccessPolicies:
           Version: '2012-10-17'
           Statement:
-            -
-              Effect: Allow
+            - Effect: Allow
               Action: 'es:ESHttp*'
               Principal:
                 AWS: '*'
-              Resource: 'arn:aws:es:${self:provider.region}:${AWS::AccountId}:domain/notes-search-${self:provider.stage}/*'
+              Condition: 
+                IpAddress: 
+                  aws:SourceIp: 
+                      - 82.222.135.242/24
+              Resource: "*"
