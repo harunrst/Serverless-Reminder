@@ -287,7 +287,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
                   {!!todo.dueDate ? dateFormat(new Date(todo.dueDate), 'dd.mm.yyyy HH:mm') as string : ""}
                 </Grid.Column>
                 <Grid.Column width={3} floated="right">
-                  {this.priorityResolver(todo.priority)}
+                  {this.priorityResolver(Number(todo.priority))}
                 </Grid.Column>
                 {!this.props.isDiscover && <Grid.Column width={2} floated="right">
                   <Button
