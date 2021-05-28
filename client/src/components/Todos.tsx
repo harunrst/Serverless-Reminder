@@ -14,7 +14,7 @@ import {
   Loader
 } from 'semantic-ui-react'
 
-import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
+import { createTodo, deleteTodo, getDiscoverTodos, getTodos, patchTodo } from '../api/todos-api'
 import Auth from '../auth/Auth'
 import { Todo } from '../types/Todo'
 
@@ -36,6 +36,8 @@ interface TodosState {
   loadingCreate: boolean
   dueDate: string
   newTodoLock: boolean
+  discoverTodos: Todo[]
+  searchText: string
 }
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
@@ -47,14 +49,27 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     loadingCreate: false,
     dueDate: '',
     newTodoLock: true,
+    discoverTodos: [],
+    searchText: ''
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({ newTodoName: event.target.value })
   }
 
+  handleSearchTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ searchText: event.target.value })
+  }
+
   onEditButtonClick = (todoId: string) => {
     this.props.history.push(`/todos/${todoId}/edit`)
+  }
+
+  searchDiscover = async () => {
+    const discoverTodos = await getDiscoverTodos(this.state.searchText);
+    this.setState({
+      discoverTodos: discoverTodos.filter(t => !!t.todoId),
+    })
   }
 
   onTodoCreate = async () => {
@@ -82,19 +97,6 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       })
     } catch {
       alert('Todo creation failed')
-    }
-  }
-  async componentDidUpdate(prevProps: TodosProps) {
-    if (prevProps.isDiscover !== this.props.isDiscover) {
-      try {
-        const todos = await getTodos(this.props.auth.getIdToken())
-        this.setState({
-          todos,
-          loadingTodos: false
-        })
-      } catch (e) {
-        alert(`Failed to fetch todos: ${e.message}`)
-      }
     }
   }
 
@@ -129,9 +131,11 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   async componentDidMount() {
     try {
+      const discoverTodos = await getDiscoverTodos()
       const todos = await getTodos(this.props.auth.getIdToken())
       this.setState({
         todos,
+        discoverTodos: discoverTodos.filter(t => !!t.todoId),
         loadingTodos: false
       })
     } catch (e) {
@@ -147,7 +151,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     return (
       <div>
         <Header as="h1">Reminders</Header>
-        {!this.props.isDiscover && this.renderCreateTodoInput()}
+        {!this.props.isDiscover ? this.renderCreateTodoInput() : this.renderDiscoverInput()}
 
         <Grid.Column width={16}>
           <Divider />
@@ -213,6 +217,32 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     )
   }
 
+  renderDiscoverInput() {
+    return (
+      <Grid.Row>
+        <Grid.Column width={16}>
+          <Input
+            fluid
+            actionPosition="left"
+            placeholder="Anything..."
+            value={this.state.searchText}
+            onChange={this.handleSearchTextChange}
+          >
+            <Button
+              loading={this.state.loadingCreate}
+              icon
+              labelPosition='right'
+              style={{ backgroundColor: "teal", color: "white" }}
+              onClick={this.searchDiscover}
+            >
+              <Icon name='search' style={{ color: "white" }} />Search</Button>
+            <input style={{ borderRadius: 0 }} />
+          </Input>
+        </Grid.Column>
+      </Grid.Row>
+    )
+  }
+
 
   renderTodos() {
     if (this.state.loadingTodos) {
@@ -235,53 +265,56 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   renderTodosList() {
     return (
       <Grid padded>
-        {this.state.todos.map((todo, pos) => {
-          return (
-            <Grid.Row key={todo.todoId} style={{ display: "flex", alignItems: "center", paddingTop: 0 }}>
-              <Grid.Column width={1} >
-                <Checkbox
-                  onChange={() => this.onTodoCheck(pos)}
-                  checked={todo.done}
-                />
-              </Grid.Column>
-              <Grid.Column width={1} >
-                {todo.lock ?
-                  <i className={"lock open icon"} style={{ color: "green" }}></i> : ""}
-              </Grid.Column>
-              <Grid.Column width={6} >
-                {todo.name}
-              </Grid.Column>
-              <Grid.Column width={3} floated="right" style={{ color: this.isExpired(todo.dueDate) && "red" }}>
-                {!!todo.dueDate ? dateFormat(new Date(todo.dueDate), 'dd.mm.yyyy HH:mm') as string : ""}
-              </Grid.Column>
-              <Grid.Column width={3} floated="right">
-                {this.priorityResolver(todo.priority)}
-              </Grid.Column>
-              <Grid.Column width={2} floated="right">
-                <Button
-                  icon
-                  color="blue"
-                  onClick={() => this.onEditButtonClick(todo.todoId)}
-                >
-                  <Icon name="pencil" />
-                </Button>
-                <Button
-                  icon
-                  color="red"
-                  onClick={() => this.onTodoDelete(todo.todoId)}
-                >
-                  <Icon name="delete" />
-                </Button>
-              </Grid.Column>
-              {todo.attachmentUrl && (
-                <Image src={todo.attachmentUrl} size="small" wrapped />
-              )}
-              <Grid.Column width={16}>
-                <Divider />
-              </Grid.Column>
-            </Grid.Row>
-          )
-        })}
+        {
+          (this.props.isDiscover ? this.state.discoverTodos : this.state.todos).map((todo, pos) => {
+            return (
+              <Grid.Row key={todo.todoId} style={{ display: "flex", alignItems: "center", paddingTop: 0 }}>
+                {!this.props.isDiscover && <Grid.Column width={1} >
+                  <Checkbox
+                    onChange={() => this.onTodoCheck(pos)}
+                    checked={todo.done}
+                  />
+                </Grid.Column>}
+
+                <Grid.Column width={1} >
+                  {todo.lock ?
+                    <i className={"lock open icon"} style={{ color: "green" }}></i> : ""}
+                </Grid.Column>
+                <Grid.Column width={6} >
+                  {todo.name}
+                </Grid.Column>
+                <Grid.Column width={3} floated="right" style={{ color: this.isExpired(todo.dueDate) && "red" }}>
+                  {!!todo.dueDate ? dateFormat(new Date(todo.dueDate), 'dd.mm.yyyy HH:mm') as string : ""}
+                </Grid.Column>
+                <Grid.Column width={3} floated="right">
+                  {this.priorityResolver(todo.priority)}
+                </Grid.Column>
+                {!this.props.isDiscover && <Grid.Column width={2} floated="right">
+                  <Button
+                    icon
+                    color="blue"
+                    onClick={() => this.onEditButtonClick(todo.todoId)}
+                  >
+                    <Icon name="pencil" />
+                  </Button>
+                  <Button
+                    icon
+                    color="red"
+                    onClick={() => this.onTodoDelete(todo.todoId)}
+                  >
+                    <Icon name="delete" />
+                  </Button>
+                </Grid.Column>}
+
+                {todo.attachmentUrl && (
+                  <Image src={todo.attachmentUrl} size="small" wrapped />
+                )}
+                <Grid.Column width={16}>
+                  <Divider />
+                </Grid.Column>
+              </Grid.Row>
+            )
+          })}
       </Grid>
     )
   }

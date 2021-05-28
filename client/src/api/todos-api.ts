@@ -17,11 +17,28 @@ export async function getTodos(idToken: string): Promise<Todo[]> {
   return response.data.items
 }
 
+export async function getDiscoverTodos(search?: string): Promise<Todo[]> {
+  console.log('Fetching todos')
+  var url = !!search ? `https://search-notes-search-dev-v1-qklf3fedpyvdmbbrqzy56tvcum.us-east-1.es.amazonaws.com/_search?q=${search}~` :
+    `https://search-notes-search-dev-v1-qklf3fedpyvdmbbrqzy56tvcum.us-east-1.es.amazonaws.com/_search`
+  const response = await Axios.get(url, {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  })
+  console.log('Todos:', response.data.hits.hits.reduce((a: Todo[], b: KibanaResponse) => [...a, b._source], []))
+  return response.data.hits.hits.reduce((a: Todo[], b: KibanaResponse) => [...a, b._source], [])
+}
+
+interface KibanaResponse {
+  _source: Todo
+}
+
 export async function createTodo(
   idToken: string,
   newTodo: CreateTodoRequest
 ): Promise<Todo> {
-  const response = await Axios.post(`${apiEndpoint}/todos`,  JSON.stringify(newTodo), {
+  const response = await Axios.post(`${apiEndpoint}/todos`, JSON.stringify(newTodo), {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
