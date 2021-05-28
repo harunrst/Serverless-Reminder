@@ -140,6 +140,17 @@ functions:
           type: dynamodb
           arn: !GetAtt TodosDynamoDBTable.StreamArn
 
+  SearchWithElasticsearch:
+    environment:
+      ES_ENDPOINT: !GetAtt NotesSearch.DomainEndpoint
+    handler: src/lambda/http/searchWithElasticsearch.handler
+    events:
+      - http:
+          method: get
+          path: discover
+          cors: true
+          authorizer: Auth
+
 resources:
   Resources:
     GatewayResponseDefault4XX:
@@ -253,5 +264,10 @@ resources:
             - Effect: Allow
               Principal:
                 AWS: !Sub arn:aws:sts::${AWS::AccountId}:assumed-role/${self:service}-${self:provider.stage}-${self:provider.region}-lambdaRole/serverless-reminder-app-${self:provider.stage}-SyncWithElasticsearch
+              Action: es:ESHttp*
+              Resource: !Sub arn:aws:es:${self:provider.region}:${AWS::AccountId}:domain/note-search-${self:provider.stage}/*
+            - Effect: Allow
+              Principal:
+                AWS: !Sub arn:aws:sts::${AWS::AccountId}:assumed-role/${self:service}-${self:provider.stage}-${self:provider.region}-lambdaRole/serverless-reminder-app-${self:provider.stage}-SearchWithElasticsearch
               Action: es:ESHttp*
               Resource: !Sub arn:aws:es:${self:provider.region}:${AWS::AccountId}:domain/note-search-${self:provider.stage}/*
