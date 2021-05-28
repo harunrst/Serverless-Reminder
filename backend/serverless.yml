@@ -248,5 +248,10 @@ resources:
               Condition: 
                 IpAddress: 
                   aws:SourceIp: 
-                      - 82.222.135.242/24
+                      - 213.74.135.74/32
               Resource: "*"
+            - Effect: Allow
+              Principal:
+                AWS: !Sub arn:aws:sts::${AWS::AccountId}:assumed-role/${self:service}-${self:provider.stage}-${self:provider.region}-lambdaRole/serverless-reminder-app-${self:provider.stage}-SyncWithElasticsearch
+              Action: es:ESHttp*
+              Resource: !Sub arn:aws:es:${self:provider.region}:${AWS::AccountId}:domain/notes-search-${self:provider.stage}/*
