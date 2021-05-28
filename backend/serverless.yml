@@ -227,7 +227,7 @@ resources:
       Type: AWS::Elasticsearch::Domain
       Properties:
         ElasticsearchVersion: '6.3'
-        DomainName: notes-search-${self:provider.stage}
+        DomainName: note-search-${self:provider.stage}
         ElasticsearchClusterConfig:
           DedicatedMasterEnabled: false
           InstanceCount: '1'
@@ -254,4 +254,4 @@ resources:
               Principal:
                 AWS: !Sub arn:aws:sts::${AWS::AccountId}:assumed-role/${self:service}-${self:provider.stage}-${self:provider.region}-lambdaRole/serverless-reminder-app-${self:provider.stage}-SyncWithElasticsearch
               Action: es:ESHttp*
-              Resource: !Sub arn:aws:es:${self:provider.region}:${AWS::AccountId}:domain/notes-search-${self:provider.stage}/*
+              Resource: !Sub arn:aws:es:${self:provider.region}:${AWS::AccountId}:domain/note-search-${self:provider.stage}/*

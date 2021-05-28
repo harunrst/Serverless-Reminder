@@ -29,7 +29,7 @@ export const handler: DynamoDBStreamHandler = async (event: DynamoDBStreamEvent)
         userId: newItem.userId.S,
         createdAt: newItem.createdAt.S,
         name: newItem.name.S,
-        priority: newItem.priority.N,
+        priority: newItem.priority.N
       }
 
       await es.index({
