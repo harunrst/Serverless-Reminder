@@ -21,22 +21,23 @@ export const handler: DynamoDBStreamHandler = async (event: DynamoDBStreamEvent)
 
     const newItem = record.dynamodb.NewImage
 
-    const todoId = newItem.todoId.S
+    if (newItem.lock.BOOL) {
+      const todoId = newItem.todoId.S
 
-    const body = {
-      todoId: newItem.todoId.S,
-      userId: newItem.userId.S,
-      createdAt: newItem.createdAt.S,
-      name: newItem.name.S,
-      priority: newItem.priority.N,
+      const body = {
+        todoId: newItem.todoId.S,
+        userId: newItem.userId.S,
+        createdAt: newItem.createdAt.S,
+        name: newItem.name.S,
+        priority: newItem.priority.N,
+      }
+
+      await es.index({
+        index: 'notes-index',
+        type: 'notes',
+        id: todoId,
+        body
+      })
     }
-
-    await es.index({
-      index: 'notes-index',
-      type: 'notes',
-      id: todoId,
-      body
-    })
-
   }
 }
