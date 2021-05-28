@@ -19,8 +19,9 @@ export async function getTodos(idToken: string): Promise<Todo[]> {
 
 export async function getDiscoverTodos(search?: string): Promise<Todo[]> {
   console.log('Fetching todos')
-  var url = !!search ? `https://search-note-search-dev-v1-3zdamk3ug6of5z54e647oeztii.us-east-1.es.amazonaws.com/_search?q=${search}~` :
-    `https://search-note-search-dev-v1-3zdamk3ug6of5z54e647oeztii.us-east-1.es.amazonaws.com/_search`
+  var elasticUrl = "<your_elastic_url>"
+  var url = !!search ? `${elasticUrl}/_search?q=${search}~` :
+    `${elasticUrl}`
   const response = await Axios.get(url, {
     headers: {
       'Content-Type': 'application/json'
