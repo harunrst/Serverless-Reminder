@@ -1,3 +1,3 @@
 # Serverless Reminder Application
 
-In Progress...
+No need to configure anything, run the client.
