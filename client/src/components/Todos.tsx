@@ -66,7 +66,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   }
 
   searchDiscover = async () => {
-    const discoverTodos = await getDiscoverTodos(this.state.searchText);
+    const discoverTodos = await getDiscoverTodos(this.props.auth.getIdToken(), this.state.searchText);
     this.setState({
       discoverTodos: discoverTodos.filter(t => !!t.todoId),
     })
@@ -131,7 +131,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   async componentDidMount() {
     try {
-      const discoverTodos = await getDiscoverTodos()
+      const discoverTodos = await getDiscoverTodos(this.props.auth.getIdToken())
       const todos = await getTodos(this.props.auth.getIdToken())
       this.setState({
         todos,

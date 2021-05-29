@@ -14,21 +14,23 @@ export async function getTodos(idToken: string): Promise<Todo[]> {
     },
   })
   console.log('Todos:', response.data)
+
   return response.data.items
 }
 
-export async function getDiscoverTodos(search?: string): Promise<Todo[]> {
-  console.log('Fetching todos')
-  var elasticUrl = "<your_elastic_url>"
-  var url = !!search ? `${elasticUrl}/_search?q=${search}~` :
-    `${elasticUrl}`
+export async function getDiscoverTodos(idToken: string, search?: string): Promise<Todo[]> {
+
+  var url = !!search ? `${apiEndpoint}/discover?q=${search}` : `${apiEndpoint}/discover`
   const response = await Axios.get(url, {
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`
     },
   })
-  console.log('Todos:', response.data.hits.hits.reduce((a: Todo[], b: KibanaResponse) => [...a, b._source], []))
-  return response.data.hits.hits.reduce((a: Todo[], b: KibanaResponse) => [...a, b._source], [])
+
+
+  console.log('Todos:', response.data.result.hits.hits.reduce((a: Todo[], b: KibanaResponse) => [...a, b._source], []))
+  return response.data.result.hits.hits.reduce((a: Todo[], b: KibanaResponse) => [...a, b._source], [])
 }
 
 interface KibanaResponse {

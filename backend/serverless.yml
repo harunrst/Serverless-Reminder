@@ -253,15 +253,6 @@ resources:
           Version: '2012-10-17'
           Statement:
             - Effect: Allow
-              Action: 'es:ESHttp*'
-              Principal:
-                AWS: '*'
-              Condition: 
-                IpAddress: 
-                  aws:SourceIp: 
-                      - <your_ip>/32
-              Resource: "*"
-            - Effect: Allow
               Principal:
                 AWS: !Sub arn:aws:sts::${AWS::AccountId}:assumed-role/${self:service}-${self:provider.stage}-${self:provider.region}-lambdaRole/serverless-reminder-app-${self:provider.stage}-SyncWithElasticsearch
               Action: es:ESHttp*
