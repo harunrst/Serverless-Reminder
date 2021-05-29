@@ -24,10 +24,7 @@ export const handler = middy(
                 body: {
                     query: {
                         match: {
-                            message: {
-                                query: searchText,
-                                fuzziness: "auto"
-                            }
+                            quote: searchText,
                         }
                     }
                 }
