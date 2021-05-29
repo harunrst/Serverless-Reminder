@@ -21,13 +21,7 @@ export const handler = middy(
         if (!!searchText)
             result = await es.search({
                 index: 'notes-index',
-                body: {
-                    query: {
-                        match: {
-                            quote: searchText,
-                        }
-                    }
-                }
+                q: searchText
             })
         else
             result = await es.search({
