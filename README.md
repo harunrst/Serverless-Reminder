@@ -1,3 +1,3 @@
 # Serverless Reminder Application
 
-No need to configure anything, run the client.
+Simple reminder app built using AWS serverless services.
